@@ -2,10 +2,12 @@ package com.first.sozluk2uygulamasi
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.OnQueryTextListener {
     private lateinit var kelimelerliste:ArrayList<Kelimeler>
     private lateinit var adapter: KelimelerAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,4 +38,21 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu,menu)
+        val item=menu?.findItem(R.id.ActionAra)
+        val searchView=item?.actionView as androidx.appcompat.widget.SearchView
+        searchView.setOnQueryTextListener(this@MainActivity)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onQueryTextSubmit(query: String?): Boolean {
+        return true
+    }
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        return true
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.first.sozluk2uygulamasi
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,6 +48,9 @@ class KelimelerAdapter(private val context: Context, private val kelimeListe:Lis
         holder.textViewingilizce.text=kelime.ingilizce
         holder.textViewturkce.text=kelime.turkce
         holder.kelime_card.setOnClickListener {
+            val ıntent=Intent(context,DetayActivity::class.java)
+            ıntent.putExtra("nesne",kelime)
+            context.startActivity(ıntent)
 
         }
 
