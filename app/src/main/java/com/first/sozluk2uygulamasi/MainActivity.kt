@@ -1,12 +1,18 @@
 package com.first.sozluk2uygulamasi
 
+import android.app.DownloadManager.Request
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.android.volley.Request.Method
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.info.sqlitekullanimihazirveritabani.DatabaseCopyHelper
 import kotlinx.android.synthetic.main.activity_main.*
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.OnQueryTextListener {
     private lateinit var kelimelerliste:ArrayList<Kelimeler>
@@ -28,6 +34,7 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
         vt=VeritabaniYardimcisi(this)
 
         kelimelerliste =KelimelerTablosuDao().tümkelimeler(vt)
+        tumkelimeler()
 
 
 
@@ -41,9 +48,9 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
         kelimelerliste.add(k3)
 
 
-       */
+
         adapter= KelimelerAdapter(this@MainActivity,kelimelerliste)
-        rv.adapter=adapter
+        rv.adapter=adapter  */
 
 
 
@@ -82,6 +89,37 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
 
         adapter= KelimelerAdapter(this@MainActivity,kelimelerliste)
         rv.adapter=adapter
+    }
+    fun tumkelimeler(){
+        val url = "http://kasimadalan.pe.hu/sozluk/tum_kelimeler.php"
+        val istek=StringRequest(Method.GET,url,Response.Listener {
+            cevap->
+            kelimelerliste= ArrayList()
+            try {
+                val Jsonobject=JSONObject(cevap)
+                val kelimeler=Jsonobject.getJSONArray("kelimeler")
+                for (i in 0 until kelimeler.length()){
+                    val k =kelimeler.getJSONObject(i)
+
+                    val kelime=Kelimeler(k.getInt("kelime_id"),
+                        k.getString("ingilizce"),
+                        k.getString("turkce"))
+                    kelimelerliste.add(kelime)
+                }
+                adapter= KelimelerAdapter(this@MainActivity,kelimelerliste)
+                rv.adapter=adapter
+
+            }catch (e:Exception){
+                e.printStackTrace()
+
+
+
+            }
+
+        },Response.ErrorListener {
+
+        })
+        Volley.newRequestQueue(this).add(istek)
     }
 
 }
