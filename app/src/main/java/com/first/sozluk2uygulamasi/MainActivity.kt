@@ -65,13 +65,13 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
-        arama(query)
+        kelimeAra(query)
 
         return true
     }
 
     override fun onQueryTextChange(newText: String): Boolean {
-        arama(newText)
+        kelimeAra(newText)
         return true
     }
     fun veritabaniKopyala(){
@@ -119,6 +119,43 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
         },Response.ErrorListener {
 
         })
+        Volley.newRequestQueue(this).add(istek)
+    }
+    fun kelimeAra(aramaKelime: String){
+        val url = "http://kasimadalan.pe.hu/sozluk/kelime_ara.php"
+        val istek=object:StringRequest(Method.POST,url,Response.Listener {
+                cevap->
+            kelimelerliste= ArrayList()
+            try {
+                val Jsonobject=JSONObject(cevap)
+                val kelimeler=Jsonobject.getJSONArray("kelimeler")
+                for (i in 0 until kelimeler.length()){
+                    val k =kelimeler.getJSONObject(i)
+
+                    val kelime=Kelimeler(k.getInt("kelime_id"),
+                        k.getString("ingilizce"),
+                        k.getString("turkce"))
+                    kelimelerliste.add(kelime)
+                }
+                adapter= KelimelerAdapter(this@MainActivity,kelimelerliste)
+                rv.adapter=adapter
+
+            }catch (e:Exception){
+                e.printStackTrace()
+
+
+
+            }
+
+        },Response.ErrorListener {
+
+        }){
+            override fun getParams(): MutableMap<String, String>? {
+                val params=HashMap<String,String>()
+                params["ingilizce"]=aramaKelime
+                return params
+            }
+        }
         Volley.newRequestQueue(this).add(istek)
     }
 
