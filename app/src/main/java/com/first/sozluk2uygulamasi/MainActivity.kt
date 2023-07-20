@@ -10,31 +10,34 @@ import com.android.volley.Request.Method
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.info.retrofitkullanimi.ApiUtils
 import com.info.sqlitekullanimihazirveritabani.DatabaseCopyHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
 
 class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.OnQueryTextListener {
     private lateinit var kelimelerliste:ArrayList<Kelimeler>
     private lateinit var adapter: KelimelerAdapter
     private lateinit var vt:VeritabaniYardimcisi
+    private lateinit var kdi:KelimelerDaointerface
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        veritabaniKopyala()
+       // veritabaniKopyala()
 
         toolbar.title ="Sozlük Uygulaması"
       setSupportActionBar(toolbar)
-
-
-
      rv.setHasFixedSize(true)
      rv.layoutManager= LinearLayoutManager(this@MainActivity)
+        kdi=ApiUtils.getKelimelerDaointerface()
+        tumKelimeler()
 
         vt=VeritabaniYardimcisi(this)
 
-        kelimelerliste =KelimelerTablosuDao().tümkelimeler(vt)
-        tumkelimeler()
+        //kelimelerliste =KelimelerTablosuDao().tümkelimeler(vt)
+       // tumkelimeler()
 
 
 
@@ -50,7 +53,7 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
 
 
         adapter= KelimelerAdapter(this@MainActivity,kelimelerliste)
-        rv.adapter=adapter  */
+        rv.adapter=adapter*/
 
 
 
@@ -65,13 +68,14 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
-        kelimeAra(query)
+        aramayap(query)
 
         return true
     }
 
     override fun onQueryTextChange(newText: String): Boolean {
-        kelimeAra(newText)
+        aramayap(newText)
+
         return true
     }
     fun veritabaniKopyala(){
@@ -84,15 +88,15 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
             e.printStackTrace()
         }
     }
-    fun arama(aramaKelime:String){
+   /* fun arama(aramaKelime:String){
         kelimelerliste =KelimelerTablosuDao().aramaYap(vt,aramaKelime)
 
         adapter= KelimelerAdapter(this@MainActivity,kelimelerliste)
         rv.adapter=adapter
-    }
-    fun tumkelimeler(){
+    }*/
+    /*fun tumkelimeler(){
         val url = "http://kasimadalan.pe.hu/sozluk/tum_kelimeler.php"
-        val istek=StringRequest(Method.GET,url,Response.Listener {
+        val istek=StringRequest(Method.GET,url, {
             cevap->
             kelimelerliste= ArrayList()
             try {
@@ -116,7 +120,7 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
 
             }
 
-        },Response.ErrorListener {
+        }, {
 
         })
         Volley.newRequestQueue(this).add(istek)
@@ -158,5 +162,43 @@ class MainActivity : AppCompatActivity() ,androidx.appcompat.widget.SearchView.O
         }
         Volley.newRequestQueue(this).add(istek)
     }
+*/
+fun tumKelimeler(){
+    kdi.tumkelimeler().enqueue(object : Callback<KelimelerCevap>{
+        override fun onResponse(call: Call<KelimelerCevap>?, response: retrofit2.Response<KelimelerCevap>?
+        ) {
 
+            if(response!=null) {
+                val liste = response.body().kelimeler
+                adapter = KelimelerAdapter(this@MainActivity,liste)
+                rv.adapter = adapter
+            }
+        }
+
+        override fun onFailure(call: Call<KelimelerCevap>?, t: Throwable?) {
+
+        }
+
+    })
+
+}
+    fun aramayap(aramaKelime:String){
+        kdi.kelimeAra(aramaKelime).enqueue(object : Callback<KelimelerCevap>{
+            override fun onResponse(call: Call<KelimelerCevap>?, response: retrofit2.Response<KelimelerCevap>?
+            ) {
+
+                if(response!=null) {
+                    val liste = response.body().kelimeler
+                    adapter = KelimelerAdapter(this@MainActivity,liste)
+                    rv.adapter = adapter
+                }
+            }
+
+            override fun onFailure(call: Call<KelimelerCevap>?, t: Throwable?) {
+
+            }
+
+        })
+
+    }
 }
